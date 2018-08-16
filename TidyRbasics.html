@@ -131,16 +131,8 @@ $(document).ready(function () {
 
 <p>Callings a masked function</p>
 <p>packageName::functionName() e.g. stats::filter()</p>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: 'dplyr'</code></pre>
-<pre><code>## The following objects are masked from 'package:stats':
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(tidyr)</code></pre>
+<pre class="r"><code>library(dplyr)
+library(tidyr)</code></pre>
 <p>Read in data from <a href="https://knb.ecoinformatics.org/#view/df35b.304.2">Mike Byerly. 2016. Alaska commercial salmon catches by management region (1886- 1997). Gulf of Alaska Data Portal.</a></p>
 <pre class="r"><code>catch_df &lt;- read.csv(url(&quot;https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1&quot;, method = &quot;libcurl&quot;),
                     stringsAsFactors = FALSE)
@@ -152,6 +144,44 @@ head(catch_df)</code></pre>
 ## 4    SSE 1889       0     182   11   92    0 285             
 ## 5    SSE 1890       0     251   42    0    0 292             
 ## 6    SSE 1891       0     274   24    0    0 298</code></pre>
+<pre class="r"><code># Select not all &amp; notesRegCode and overwite catch_df
+catch_df &lt;- catch_df %&gt;% 
+  select(-All,-notesRegCode)</code></pre>
+<p>Transpose form Wide to Long Format using gather and Rename Column Catch</p>
+<pre class="r"><code>catch_df &lt;- catch_df %&gt;% 
+  
+  gather(key = &quot;Species&quot;, value = &quot;Catch&quot;, -Region, -Year) %&gt;% 
+  rename(catchThousands = Catch)
+
+
+head(catch_df)</code></pre>
+<pre><code>##   Region Year Species catchThousands
+## 1    SSE 1886 Chinook              0
+## 2    SSE 1887 Chinook              0
+## 3    SSE 1888 Chinook              0
+## 4    SSE 1889 Chinook              0
+## 5    SSE 1890 Chinook              0
+## 6    SSE 1891 Chinook              0</code></pre>
+<p>Let’s Count Fish 1 fish 2 fish red fish lake</p>
+<pre class="r"><code># Convert Char to num
+catchInt &lt;- as.integer(catch_df$catchThousands)</code></pre>
+<pre><code>## Warning: NAs introduced by coercion</code></pre>
+<pre class="r"><code>naIx &lt;- which(is.na(catchInt) == T)
+catch_df$catchThousands[naIx]</code></pre>
+<pre><code>## [1] &quot;I&quot;</code></pre>
+<p>turn this I into a 1 coerce catchThousands into numerical type convert catchThosands into units of fishes</p>
+<pre class="r"><code>catch_df &lt;- catch_df %&gt;% 
+  mutate(catchThousands = ifelse( catchThousands == &quot;I&quot;, 1, catchThousands)) %&gt;% 
+  mutate(catchThousands = as.integer(catchThousands)) %&gt;% 
+  mutate(Catch = catchThousands*1000)
+tail(catch_df)</code></pre>
+<pre><code>##      Region Year Species catchThousands  Catch
+## 8535    NOP 1992    Chum            342 342000
+## 8536    NOP 1993    Chum            135 135000
+## 8537    NOP 1994    Chum             84  84000
+## 8538    NOP 1995    Chum             99  99000
+## 8539    NOP 1996    Chum             68  68000
+## 8540    NOP 1997    Chum             97  97000</code></pre>
 
 
 
