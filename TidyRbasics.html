@@ -182,6 +182,88 @@ tail(catch_df)</code></pre>
 ## 8538    NOP 1995    Chum             99  99000
 ## 8539    NOP 1996    Chum             68  68000
 ## 8540    NOP 1997    Chum             97  97000</code></pre>
+<div id="split-apply-combine" class="section level1">
+<h1>Split Apply Combine</h1>
+<pre class="r"><code>catchSummarized &lt;- catch_df %&gt;% 
+  group_by(Region,Species) %&gt;% 
+  summarise(meanCatch = mean(Catch),
+            sdCatch = sd(Catch),
+            numObs = n()) %&gt;%
+  # Filter for Chinook
+  filter(Species == &quot;Chinook&quot;)
+
+head(catchSummarized)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+## # Groups:   Region [6]
+##   Region Species meanCatch sdCatch numObs
+##   &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;  &lt;int&gt;
+## 1 ALU    Chinook      23.0    214.     87
+## 2 BER    Chinook      19.6    139.    102
+## 3 BRB    Chinook   76211.   52222.    114
+## 4 CHG    Chinook    1536.    2540.    110
+## 5 CKI    Chinook   43876.   33859.    105
+## 6 COP    Chinook   19798.   14352.     94</code></pre>
+<p>Filter by year then group</p>
+<pre class="r"><code>catchYear &lt;- catch_df %&gt;% 
+  filter(Year &gt;1975 | Year &lt; 1925) %&gt;% 
+  group_by(Year, Species) %&gt;% 
+  summarize(catchSum = sum(Catch))
+ head(catchYear)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+## # Groups:   Year [2]
+##    Year Species catchSum
+##   &lt;int&gt; &lt;chr&gt;      &lt;dbl&gt;
+## 1  1878 Chinook        0
+## 2  1878 Chum           0
+## 3  1878 Coho           0
+## 4  1878 Pink           0
+## 5  1878 Sockeye        0
+## 6  1879 Chinook        0</code></pre>
+</div>
+<div id="joins" class="section level1">
+<h1>Joins</h1>
+<p>Read Regions definitions file</p>
+<pre class="r"><code>region_defs &lt;- read.csv(url(&quot;https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1&quot;, method = &quot;libcurl&quot;),
+                        stringsAsFactors = FALSE)
+head(region_defs)</code></pre>
+<pre><code>##      code                                  mgmtArea areaClass regionCode
+## 1     GSE              Unallocated Southeast Alaska  mgmtArea          1
+## 2     NSE                 Northern Southeast Alaska  mgmtArea          1
+## 3     SSE                 Southern Southeast Alaska  mgmtArea          1
+## 4     YAK                                   Yakutat  mgmtArea          1
+## 5 PWSmgmt      Prince William Sound Management Area  mgmtArea          2
+## 6     BER Bering River Subarea Copper River Subarea   subarea          2
+##                                                                                                                                                                                     notes
+## 1                                                            Included are Southeastern Alaska catches which could not be assigned\nto Northern or Southern Southeastern Alaska or Yakutat
+## 2 Northern Southern Alaska includes Districts 9 through 16 from summer straight northwest to and including the fairweather Grounds but excludes Yakutat fisheries unless otherwise noted.
+## 3                                                                                                                                                                                        
+## 4                                                                                                                                                                                        
+## 5                                                                                                            Includes the Bering River and Copper River and Prince William Sound Subareas
+## 6</code></pre>
+<pre class="r"><code>region_defs &lt;-region_defs %&gt;% 
+  select(code,mgmtArea)
+
+head(region_defs)</code></pre>
+<pre><code>##      code                                  mgmtArea
+## 1     GSE              Unallocated Southeast Alaska
+## 2     NSE                 Northern Southeast Alaska
+## 3     SSE                 Southern Southeast Alaska
+## 4     YAK                                   Yakutat
+## 5 PWSmgmt      Prince William Sound Management Area
+## 6     BER Bering River Subarea Copper River Subarea</code></pre>
+<pre class="r"><code>catch_joined &lt;- left_join(catch_df,region_defs, by = c(&quot;Region&quot; = &quot;code&quot;))
+# Move magmtArea 
+catch_joined &lt;- select(catch_joined,Region,mgmtArea,Year,Species,catchThousands,Catch)
+
+head(catch_joined)</code></pre>
+<pre><code>##   Region                  mgmtArea Year Species catchThousands Catch
+## 1    SSE Southern Southeast Alaska 1886 Chinook              0     0
+## 2    SSE Southern Southeast Alaska 1887 Chinook              0     0
+## 3    SSE Southern Southeast Alaska 1888 Chinook              0     0
+## 4    SSE Southern Southeast Alaska 1889 Chinook              0     0
+## 5    SSE Southern Southeast Alaska 1890 Chinook              0     0
+## 6    SSE Southern Southeast Alaska 1891 Chinook              0     0</code></pre>
+</div>
 
 
 

@@ -65,3 +65,51 @@ catch_df <- catch_df %>%
   mutate(Catch = catchThousands*1000)
 tail(catch_df)
 ```
+# Split Apply Combine
+
+```{r}
+catchSummarized <- catch_df %>% 
+  group_by(Region,Species) %>% 
+  summarise(meanCatch = mean(Catch),
+            sdCatch = sd(Catch),
+            numObs = n()) %>%
+  # Filter for Chinook
+  filter(Species == "Chinook")
+
+head(catchSummarized)
+```
+Filter by year then group
+```{r}
+catchYear <- catch_df %>% 
+  filter(Year >1975 | Year < 1925) %>% 
+  group_by(Year, Species) %>% 
+  summarize(catchSum = sum(Catch))
+ head(catchYear)
+```
+# Joins
+
+Read Regions definitions file
+```{r}
+region_defs <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1", method = "libcurl"),
+                        stringsAsFactors = FALSE)
+head(region_defs)
+
+
+```
+
+```{r}
+region_defs <-region_defs %>% 
+  select(code,mgmtArea)
+
+head(region_defs)
+
+```
+```{r}
+catch_joined <- left_join(catch_df,region_defs, by = c("Region" = "code"))
+# Move magmtArea 
+catch_joined <- select(catch_joined,Region,mgmtArea,Year,Species,catchThousands,Catch)
+
+head(catch_joined)
+```
+
+
