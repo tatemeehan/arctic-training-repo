@@ -1,0 +1,49 @@
+---
+title: "markdownBasics"
+author: "T8"
+date: "August 14, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Markdown Basics
+If I were an Italian I would be *italicised!*
+
+- Bullets Fly Fast
+
+* They can be leathal
+
+    + aim at only that which you intend to shoot
+
+
+        + that was an excellent use of which
+        
+```{r}
+easyEqn <- 77%%8
+easyEqn
+```
+```{r}
+hardEqn <- easyEqn%%4
+```
+
+# Function Intro
+
+funk(argname1 = argvalue1, ...)
+
+```{r}
+# wd = getwd()
+wd = setwd('E:/')
+dataDir <- paste0(substr(wd, start = 1, stop = 2),"/ArcticDataCenter/Data/TweedieData/data/")
+# dataDir <- ("E:\\ArcticDataCenter\\Data\\TweedieData\\data")
+dataFile <- "/NPEOchem2000data.csv"
+fullFile <- paste0(dataDir,dataFile)
+bgChem <- read.csv(fullFile,stringsAsFactors = FALSE)
+# fullFile
+# readClipboard()
+plot(bgChem$CTD_Depth,bgChem$CTD_Temperature)
+
+
+
+```
