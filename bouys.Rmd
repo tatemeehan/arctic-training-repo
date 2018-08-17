@@ -1,0 +1,39 @@
+---
+title: "rfish_RopenSci"
+author: "T8"
+date: "August 17, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rfishbase)
+library(fansi)
+
+```
+
+```{r}
+fish <- c("Oreochromis niloticus", "Salmo trutta")
+fish <- validate_names(c("Oreochromis niloticus", "Salmo trutta"))
+```
+
+## R NOAA
+
+```{r}
+install.packages("rnoaa")
+```
+```{r}
+library("rnoaa")
+```
+
+```{r}
+# Go here: http://www.ndbc.noaa.gov/
+# Find a station ID, like https://www.ndbc.noaa.gov/station_page.php?station=46080
+bd <- buoy(dataset = 'cwind', buoyid = 46080, year = 2016, datatype = "c")
+```
+
+
+
