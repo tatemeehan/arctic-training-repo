@@ -25,3 +25,24 @@ x <- httr::GET(merraMBurl)
 content <- httr::content(x)
 writeBin(content,tmp)
 nc <- ncdf4::nc_open(tmp)
+
+# Extract the Data from ncobject
+merraMB <- ncvar_get(nc,"mb")
+merraMBmat1980 <- merraMB[1:720,1:361,1]
+merraLon <- ncvar_get(nc,"lon")
+merraLat <- ncvar_get(nc,"lat")
+merraTime <- ncvar_get(nc,"time")
+
+# View the Massbalance data for 1980
+image(merraLon, merraLat,merraMBmat1980, col=terrain.colors(100),axes=TRUE)
+contour(merraLon, merraLat,merraMBmat1980, levels=seq(min(merraMBmat1980), max(merraMBmat1980), by=5), add=TRUE, col="black")
+
+# Just Get Greenland
+GreenlandLon <- which(merraLon > 275)
+GreenlandLat <- which(merraLat>50)
+merraMB1980Greenland <- merraMB[GreenlandLon,GreenlandLat,1]
+image(merraLon[GreenlandLon], merraLat[GreenlandLat],merraMB1980Greenland, col=terrain.colors(100),axes=TRUE)
+title("Surface Mass Balance")
+# Image T2 for Greenland
+image(merraLon[GreenlandLon], merraLat[GreenlandLat],merraT2[GreenlandLon,GreenlandLat,1], col=heat.colors(100),axes=TRUE)
+title('2m Air Temperature')
